@@ -18,17 +18,46 @@ app.add_middleware(
 )
 
 file_id = "1nXKrTVGIhNt91V6ZEawWm7QY8Mfcoy_s"
-url = f"https://drive.google.com/uc?export=download&id={file_id}"
 model_path = "model.h5"
 
+
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith("download_warning"):
+            return value
+    return None
+
+
+def save_response_content(response, destination, chunk_size=32768):
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(chunk_size):
+            if chunk:
+                f.write(chunk)
+
+
+def download_file_from_google_drive(file_id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+    response = session.get(URL, params={"id": file_id}, stream=True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = {"id": file_id, "confirm": token}
+        response = session.get(URL, params=params, stream=True)
+
+    save_response_content(response, destination)
+
+
+# حمل الملف إذا لم يكن موجودًا
 if not os.path.exists(model_path):
-    print("Downloading model...")
-    r = requests.get(url)
-    with open(model_path, "wb") as f:
-        f.write(r.content)
+    print("Downloading model from Google Drive...")
+    download_file_from_google_drive(file_id, model_path)
     print("Model downloaded!")
 
+# تحميل المودل بعد ما نضمن أنه نزل كامل
 model = tf.keras.models.load_model(model_path)
+
 
 # حجم التدريب
 IMG_SIZE = 224
