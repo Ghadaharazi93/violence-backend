@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-file_id = "1nXKrTVGIhNt91V6ZEawWm7QY8Mfcoy_s"
+file_id = "1_y4ooiKRwm7Nd9XzFuSKLoxKDodRP2Of"
 model_path = "model.h5"
 
 
@@ -37,7 +37,6 @@ def save_response_content(response, destination, chunk_size=32768):
 
 def download_file_from_google_drive(file_id, destination):
     URL = "https://docs.google.com/uc?export=download"
-
     session = requests.Session()
     response = session.get(URL, params={"id": file_id}, stream=True)
     token = get_confirm_token(response)
@@ -108,3 +107,4 @@ async def predict_endpoint(file: UploadFile = File(...)):
         "action_label": action_label,
         "confidence": confidence
     }
+
