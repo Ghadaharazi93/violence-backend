@@ -3,5 +3,6 @@ uvicorn
 python-multipart
 pillow
 numpy
-tensorflow
+tensorflow==2.12
 requests
+h5py
