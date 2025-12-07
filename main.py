@@ -17,8 +17,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-file_id = "1_y4ooiKRwm7Nd9XzFuSKLoxKDodRP2Of"
+file_id = "1nXKrTVGIhNt91V6ZEawWm7QY8Mfcoy_s"
 model_path = "model.h5"
+
 
 def get_confirm_token(response):
     for key, value in response.cookies.items():
@@ -48,31 +49,28 @@ def download_file_from_google_drive(file_id, destination):
     save_response_content(response, destination)
 
 
-# حمل الملف إذا لم يكن موجودًا
+# Download model if not exists
 if not os.path.exists(model_path):
     print("Downloading model from Google Drive...")
     download_file_from_google_drive(file_id, model_path)
     print("Model downloaded!")
 
-# تحميل المودل بعد ما نضمن أنه نزل كامل
+
+# Load the model
 model = tf.keras.models.load_model(model_path)
 
 
-# حجم التدريب
 IMG_SIZE = 224
 
-# جميع الكلاسات حسب تدريبك
 CLASS_NAMES = [
     "hit", "kick", "punch", "push", "shoot_gun",
     "ride_horse", "stand", "wave"
 ]
 
-# الكلاسات العنيفة
 VIOLENCE_CLASSES = {"hit", "kick", "punch", "push", "shoot_gun"}
 
 
 def preprocess_image(image: Image.Image) -> np.ndarray:
-    """نفس تجهيز الصورة في كولاب تمامًا"""
     image = image.convert("RGB")
     image = image.resize((IMG_SIZE, IMG_SIZE))
     img = np.array(image).astype("float32") / 255.0
@@ -81,7 +79,6 @@ def preprocess_image(image: Image.Image) -> np.ndarray:
 
 
 def predict_image_array(image: Image.Image):
-    """منطق التصنيف نفس الي تستخدمينه على الفيديو"""
     x = preprocess_image(image)
     preds = model.predict(x, verbose=0)[0]
 
@@ -101,7 +98,6 @@ def home():
 
 @app.post("/predict-image")
 async def predict_endpoint(file: UploadFile = File(...)):
-    """يرجع نفس النتائج اللي تظهر عندك في كولاب"""
     contents = await file.read()
     image = Image.open(io.BytesIO(contents))
 
@@ -112,4 +108,3 @@ async def predict_endpoint(file: UploadFile = File(...)):
         "action_label": action_label,
         "confidence": confidence
     }
-
