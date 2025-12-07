@@ -17,9 +17,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-file_id = "1nXKrTVGIhNt91V6ZEawWm7QY8Mfcoy_s"
+file_id = "1_y4ooiKRwm7Nd9XzFuSKLoxKDodRP2Of"
 model_path = "model.h5"
-
 
 def get_confirm_token(response):
     for key, value in response.cookies.items():
@@ -113,3 +112,4 @@ async def predict_endpoint(file: UploadFile = File(...)):
         "action_label": action_label,
         "confidence": confidence
     }
+
